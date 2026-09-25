@@ -1,0 +1,33 @@
+name: cxhelper-oss-x64
+
+on:
+  workflow_dispatch:
+    branch: master
+
+jobs:
+  build:
+    name: 编译构建
+    runs-on: ubuntu-latest
+    container: linuxdeepin/deepin:crimson-amd64-v1.6.0
+
+    steps:
+    - name: 检查代码
+      uses: actions/checkout@v4
+
+    - name: 安装所需依赖
+      run: |
+        apt update && apt upgrade -y
+        apt install -y \
+          build-essential git python3-pip cmake make
+
+    - name: 编译
+      continue-on-error: false
+      run: |
+        cmake -B build -DCMAKE_BUILD_TYPE=Release
+        cmake --build build -j 8
+
+    - name: 上传构建产物
+      uses: actions/upload-artifact@v4
+      with:
+        name: cxhelper-oss-x64
+        path: ./build
