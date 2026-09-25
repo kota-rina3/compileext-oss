@@ -23,7 +23,7 @@ jobs:
     - name: 下载并解压头文件
       run: |
         curl -fsSL "https://nodejs.org/dist/v22.21.1/node-v22.21.1-headers.tar.gz" -o /tmp/node-headers.tar.gz
-        tar -xJf /tmp/node-headers.tar.gz -C /usr/local/ --strip-components=1
+        tar -xzvf /tmp/node-headers.tar.gz -C /usr/local/ --strip-components=1
 
     - name: 编译
       continue-on-error: false
