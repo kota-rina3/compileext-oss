@@ -1,0 +1,40 @@
+name: compileext-oss-loong64
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: 编译构建 (loong64)
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 检查代码
+      uses: actions/checkout@v4
+
+    - name: 设置 QEMU（loong64 模拟）
+      uses: docker/setup-qemu-action@v4
+
+    - name: 在 deepin-loong64 容器中编译
+      run: |
+        docker run --platform linux/loong64 \
+          -v "${{ github.workspace }}:/workspace" \
+          -w /workspace \
+          linuxdeepin/deepin:crimson-loong64-v1.6.0 \
+          bash -c '
+            set -e
+            apt update && apt upgrade -y
+            apt install -y build-essential git python3-pip cmake make curl tar
+
+            curl -fsSL "https://nodejs.org/dist/v22.21.1/node-v22.21.1-headers.tar.gz" -o /tmp/node-headers.tar.gz
+            tar -xzvf /tmp/node-headers.tar.gz -C /usr/local/ --strip-components=1
+
+            cmake -B build -DNODE_HEADERS_DIR=/usr/local/include/node -DCMAKE_BUILD_TYPE=Release
+            cmake --build build -j 8
+          '
+
+    - name: 上传构建产物
+      uses: actions/upload-artifact@v4
+      with:
+        name: compileext-oss-loong64
+        path: ./build
