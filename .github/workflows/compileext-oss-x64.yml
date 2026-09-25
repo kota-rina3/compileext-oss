@@ -28,7 +28,7 @@ jobs:
     - name: 编译
       continue-on-error: false
       run: |
-        cmake -B build -DNODE_HEADERS_DIR=/usr/local/node-v22.21.1/include/node -DCMAKE_BUILD_TYPE=Release
+        cmake -B build -DNODE_HEADERS_DIR=/usr/local/include/node -DCMAKE_BUILD_TYPE=Release
         cmake --build build -j 8
 
     - name: 上传构建产物
