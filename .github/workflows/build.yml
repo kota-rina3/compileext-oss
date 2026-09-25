@@ -1,0 +1,52 @@
+name: build
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: ${{ matrix.os }}-${{ matrix.arch }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            arch: x64
+          - os: ubuntu-22.04-arm
+            arch: arm64
+          - os: macos-14
+            arch: arm64
+          - os: macos-13
+            arch: x64
+          - os: windows-2022
+            arch: x64
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Test (non-Windows)
+        if: runner.os != 'Windows'
+        run: node test/test.js
+
+      - name: Test (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: node test/test.js
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CompileExt-${{ matrix.os }}-${{ matrix.arch }}
+          path: build/CompileExt.node
